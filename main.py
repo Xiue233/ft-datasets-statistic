@@ -239,7 +239,8 @@ def analyze_dataset(
                     bin_counts[f">{BINS[-1]}"] += 1
         labels, values = zip(*bin_counts.items())
 
-    ax.bar(labels, values, color="skyblue")
+    bars = ax.bar(labels, values, color="skyblue")
+    ax.bar_label(bars)
     ax.set_title("Token Count Distribution")
     ax.set_xlabel("Token Count Range")
     ax.set_ylabel("Number of Items")
@@ -299,15 +300,11 @@ with gr.Blocks() as demo:
                 value="ModelScope",
             )
 
-            with gr.Row():
-                cached_tokenizers_dropdown = gr.Dropdown(
-                    label="Select from Cache", choices=get_cached_tokenizers()
-                )
-                refresh_cache_btn = gr.Button("🔄", elem_classes="tool")
-
-            model_name_textbox = gr.Textbox(
+            model_name_input = gr.Dropdown(
                 label="Model Name or Local Path",
-                info="e.g., 'qwen/Qwen2-7B-Instruct' or select from cache.",
+                info="Select a cached model or type a new one to download.",
+                choices=get_cached_tokenizers(),
+                allow_custom_value=True,
             )
             hf_token = gr.Textbox(
                 label="Hugging Face Token (optional)", type="password"
@@ -338,26 +335,11 @@ with gr.Blocks() as demo:
     item_preview = gr.JSON(label="Dataset Item Content")
 
     # --- Event Handlers ---
-    def refresh_dropdown():
-        return gr.Dropdown(choices=get_cached_tokenizers())
-
-    def select_cached_tokenizer(selection):
-        return selection
-
-    refresh_cache_btn.click(
-        fn=refresh_dropdown, inputs=[], outputs=[cached_tokenizers_dropdown]
-    )
-    cached_tokenizers_dropdown.change(
-        fn=select_cached_tokenizer,
-        inputs=cached_tokenizers_dropdown,
-        outputs=model_name_textbox,
-    )
-
     analyze_btn.click(
         fn=analyze_dataset,
         inputs=[
             file_upload,
-            model_name_textbox,
+            model_name_input,
             model_source,
             chat_template,
             hf_token,
@@ -369,7 +351,7 @@ with gr.Blocks() as demo:
             preview_slider,
             item_preview,
             temp_dataset_path_state,
-            cached_tokenizers_dropdown,
+            model_name_input,  # Update dropdown choices on completion
         ],
     )
     preview_slider.release(
