@@ -1,0 +1,7 @@
+.venv
+__pycache__
+.gitignore
+tokenizer_cache
+.git
+.idea
+.vscode

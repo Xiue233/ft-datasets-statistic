@@ -269,4 +269,4 @@ with gr.Blocks() as demo:
     preview_slider.release(fn=get_dataset_item, inputs=[temp_dataset_path_state, preview_slider], outputs=[item_preview])
 
 if __name__ == "__main__":
-    demo.launch()
+    demo.launch(server_name="0.0.0.0", server_port=7860)
